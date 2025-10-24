@@ -34,8 +34,10 @@ Server settings can be configured in [`config/server_config.json`](config/server
     "ControlPort": 9002     // Client control message port
   }
 }
-
+```
 ## Build Server
+
+```cmake
 
 mkdir build
 cd build
