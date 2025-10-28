@@ -1,0 +1,12 @@
+
+{
+  "server": {
+    "Port": 8000,
+    "heartbeat_Port": 8003,
+    "MaxConnections": 100
+  },
+  "client": {
+    "RecievePort": 8001,
+    "ControlPort": 8002
+  }
+}

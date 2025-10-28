@@ -20,18 +20,19 @@ A lightweight UDP server implementation for walkie-talkie style voice communicat
 
 ## Configuration
 
-Server settings can be configured in [`config/server_config.json`](config/server_config.json):
+Server settings can be configured in [`config/config.json`](config/config.json):
+make sure config.json in the same folder with execute program
 
 ```json
 {
   "server": {
-    "Port": 9000,           // Main server port
-    "heartbeat_Port": 9003, // Heartbeat monitoring port
+    "Port": 8000,           // Main server port
+    "heartbeat_Port": 8003, // Heartbeat monitoring port
     "MaxConnections": 100   // Maximum concurrent connections
   },
   "client": {
-    "RecievePort": 9001,    // Client audio receive port
-    "ControlPort": 9002     // Client control message port
+    "RecievePort": 8001,    // Client audio receive port
+    "ControlPort": 8002     // Client control message port
   }
 }
 ```

@@ -42,3 +42,13 @@ set(SOURCES
 add_executable(SpeakServer ${SOURCES})
 
 target_link_libraries(SpeakServer ${Boost_LIBRARIES})
+
+# 添加复制配置文件的命令
+add_custom_command(
+    TARGET SpeakServer POST_BUILD
+    # COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:SpeakServer>/config"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/config/config.json"
+        "$<TARGET_FILE_DIR:SpeakServer>/config.json"
+    COMMENT "Copying config.json to executable directory"
+)
