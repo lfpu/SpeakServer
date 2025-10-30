@@ -39,6 +39,10 @@ void ClientSession::SetUserName(const std::string &name)
     User_Name = name;
 }
 
+void ClientSession::SetRecievePoint(const unsigned short target_port){
+    recievePoint= udp::endpoint (endpoint_.address(),boost::asio::ip::port_type(target_port));
+}
+
 void ClientSession::updateHeartbeat()
 {
     last_active_ = std::chrono::steady_clock::now();

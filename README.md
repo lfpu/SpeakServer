@@ -23,6 +23,8 @@ A lightweight UDP server implementation for walkie-talkie style voice communicat
 Server settings can be configured in [`config/config.json`](config/config.json):
 make sure config.json in the same folder with execute program
 
+#client receive port config removed, it's auto port from client
+
 ```json
 {
   "server": {

@@ -66,36 +66,15 @@ void VoiceServer::startReceive()
         });
 }
 
-void VoiceServer::receiveLoop()
-{
-    while (running_)
-    {
-        boost::system::error_code error;
-        size_t len = socket_.receive_from(boost::asio::buffer(recv_buffer_), remote_endpoint_, 0, error);
-        if (!error && len > 0)
-        {
-            std::vector<char> data(recv_buffer_.begin(), recv_buffer_.begin() + len);
-            std::string client_id = remote_endpoint_.address().to_string() + ":" + std::to_string(remote_endpoint_.port());
-            bool res = handshake(remote_endpoint_, data, client_id);
-            if (!res)
-                continue;
-        }
-        else if (error)
-        {
-            std::cerr << "Receive error: " << error.message() << std::endl;
-        }
 
-        cleanupInactiveSessions();
-        audio_stream_manager_.unregisterInactiveClients();
-    }
-}
 bool VoiceServer::handshake(const udp::endpoint &client_endpoint, const std::vector<char> &data, const std::string &client_id)
 {
 
     // 👇 新增：处理 handshake 消息
     std::string msg(data.begin(), data.end());
-    if (msg == "handshake")
+    if (msg._Starts_with("handshake"))
     {
+        int recievePorint =std::stoi(msg.substr(10)); // 提取接收端口号
         auto it = client_sessions_.find(client_id);
         if (it == client_sessions_.end())
         {
@@ -109,17 +88,19 @@ bool VoiceServer::handshake(const udp::endpoint &client_endpoint, const std::vec
                 return false; // Skip adding this client
             }
             auto session = std::make_shared<ClientSession>(remote_endpoint_);
+            session->SetRecievePoint(recievePorint);
             client_sessions_[client_id] = session;
         }
         else
         {
             it->second->updateLastActive();
+            it->second->SetRecievePoint(recievePorint);
         }
         std::cout << "New client connected: " << client_id << std::endl;
         std::cout << "Total connected clients: " << client_sessions_.size() << " / 100" << std::endl;
         std::string reply = "handshake_ack";
         socket_.send_to(boost::asio::buffer(reply), remote_endpoint_);
-        std::cout << "Handshake received from " << client_id << ", sent ack." << std::endl;
+        std::cout << "Handshake received from " << client_id << ",  sent ack." << std::endl;
         return false; // 不处理音频数据
     }
     else if (msg._Starts_with("heartbeat"))
@@ -146,8 +127,9 @@ bool VoiceServer::handshake(const udp::endpoint &client_endpoint, const std::vec
     // {
     //     std::lock_guard<std::mutex> lock(session_mutex_);
     // }
-
-    audio_stream_manager_.receiveAudio(data, remote_endpoint_, config_.client_recieve_port);
+    auto it=client_sessions_.find(client_id);
+    if(it==client_sessions_.end()) return true;
+    audio_stream_manager_.receiveAudio(data, it->first, it->second->recievePoint);
     return true;
 }
 void VoiceServer::cleanupInactiveSessions()
@@ -165,4 +147,7 @@ void VoiceServer::cleanupInactiveSessions()
             ++it;
         }
     }
+}
+std::unordered_map<std::string, std::shared_ptr<ClientSession>> VoiceServer::GetSessions(){
+    return client_sessions_;
 }

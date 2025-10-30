@@ -17,9 +17,9 @@ public:
     VoiceServer(boost::asio::io_context& io_context,ServerConfig config);
     void start();
     void stop();
-
+    std::unordered_map<std::string, std::shared_ptr<ClientSession>> GetSessions();
 private:
-    void receiveLoop();
+
 
 
     void startReceive();

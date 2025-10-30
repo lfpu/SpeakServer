@@ -23,12 +23,12 @@ public:
     bool isActive() const;
 
     void SetUserName(const std::string& name);
-    
+    void SetRecievePoint(const unsigned short target_port);
     void updateHeartbeat();
     bool isTimedOut(std::chrono::steady_clock::time_point now, std::chrono::seconds timeout) const;
 
     std::string User_Name;
-
+    udp::endpoint recievePoint;
 
 private:
     udp::endpoint endpoint_;
