@@ -34,20 +34,20 @@ void AudioStreamManager::forwardAudio(const std::vector<char> &data, const std::
     std::lock_guard<std::mutex> lock(mutex_);
     for (const auto &[key, endpoint] : clients_)
     {
-        //if (key != senderid)
-        //{
-            // 客户端的音频接受端口固定为9001
-            // udp::endpoint target_endpoint(endpoint.address(),boost::asio::ip::port_type(target_port));
+        if (key != senderid)
+        {
             boost::system::error_code ec;
             socket_.send_to(boost::asio::buffer(data), endpoint, 0, ec);
             if (ec)
             {
                 std::cerr << "Failed to send audio to " << key << ": " << ec.message() << std::endl;
-            }else{
-                std::clog <<"Send voice data to :"<<endpoint.address() <<", receive port:"<<endpoint.port()<<std::endl;
             }
-        //}
+            // else{
+            //     std::clog <<"Send voice data to :"<<endpoint.address() <<", receive port:"<<endpoint.port()<<std::endl;
+            // }
+        }
     }
+    std::cout<< "Forword to "<<clients_.size()<< "success."<<std::endl;
 }
 
 void AudioStreamManager::registerClient(const udp::endpoint &client)

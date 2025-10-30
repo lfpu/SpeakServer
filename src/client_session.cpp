@@ -1,6 +1,6 @@
 #include "client_session.hpp"
 #include <chrono>
-
+#include <iostream>
 ClientSession::ClientSession(const udp::endpoint &endpoint)
     : endpoint_(endpoint),
       last_active_(std::chrono::steady_clock::now())
