@@ -38,6 +38,7 @@ set(SOURCES
     src/config_loader.cpp
     src/control_message.cpp
     src/audio_File.cpp
+    src/utils.cpp
 )
 
 add_executable(SpeakServer ${SOURCES})

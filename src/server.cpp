@@ -101,7 +101,7 @@ bool VoiceServer::handshake(const udp::endpoint &client_endpoint, const std::vec
         std::cout << "Total connected clients: " << client_sessions_.size() << " / 100" << std::endl;
         std::string reply = "handshake_ack";
         socket_.send_to(boost::asio::buffer(reply), remote_endpoint_);
-        std::cout << "Handshake received from " << client_id << ",  sent ack." << std::endl;
+        std::cout << "Handshake received from " << client_id << ",  sent ack. Recieve Port: "<<recievePorint << std::endl;
 
         return false; // 不处理音频数据
     }else if(msg=="receive"){
@@ -110,6 +110,10 @@ bool VoiceServer::handshake(const udp::endpoint &client_endpoint, const std::vec
         if(it!=client_sessions_.end()){
             socket_.send_to(boost::asio::buffer("copy"), it->second->recievePoint);
         }
+        return false;
+    }else if(msg=="GetUsers"){
+       socket_.send_to(getDistinctUserNamesJson(client_sessions_),remote_endpoint_);
+       return false;
     }
     else if (msg._Starts_with("heartbeat"))
     {
@@ -120,7 +124,8 @@ bool VoiceServer::handshake(const udp::endpoint &client_endpoint, const std::vec
             it->second->updateHeartbeat();
             it->second->updateLastActive();
             it->second->SetUserName(username);
-            std::cout << "Heartbeat received from User:" << username << "," << client_id << std::endl;
+            audio_stream_manager_.UpdateClients(it->second->User_Name);
+            //std::cout << "Heartbeat received from User:" << username << "," << client_id << std::endl;
             // socket_.send_to(boost::asio::buffer("copy"),remote_endpoint_);
         }
         else
@@ -131,6 +136,14 @@ bool VoiceServer::handshake(const udp::endpoint &client_endpoint, const std::vec
             std::cout << "New client connected via heartbeat: User:" << username << "," << client_id << std::endl;
         }
         return false; // 不处理音频数据
+    }else if(data[0]==0x001){
+        auto it = client_sessions_.find(client_id);
+        it->second->IsSpeaking=true;
+        return false;
+    }else if(data[0]==0x002){
+        auto it = client_sessions_.find(client_id);
+        it->second->IsSpeaking=false;
+        return false;
     }
 
     // {
@@ -139,7 +152,8 @@ bool VoiceServer::handshake(const udp::endpoint &client_endpoint, const std::vec
     auto it = client_sessions_.find(client_id);
     if (it == client_sessions_.end())
         return true;
-    audio_stream_manager_.receiveAudio(data, it->first, it->second->recievePoint);
+    if(it->second->IsMute) return true;
+    audio_stream_manager_.receiveAudio(data, it->second->User_Name, it->second->recievePoint);
     return true;
 }
 void VoiceServer::cleanupInactiveSessions()

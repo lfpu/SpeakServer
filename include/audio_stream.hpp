@@ -5,12 +5,16 @@
 #include <mutex>
 #include <boost/asio.hpp>
 #include "audio_File.hpp"
+#include "client_session.hpp"
 
 using boost::asio::ip::udp;
 
 class AudioStreamManager {
 public:
     AudioStreamManager(boost::asio::ip::udp::socket& socket);
+
+    void UpdateClients( std::string key);
+
     /// @brief 接收音频数据并更新客户端活跃时间。
     /// @param data 
     /// @param sender 
@@ -32,4 +36,5 @@ private:
     std::mutex mutex_;
 
     //AudioFile file;
+    std::string extractSpeakTo(const std::vector<char>& data);
 };

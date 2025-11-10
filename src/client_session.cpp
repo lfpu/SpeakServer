@@ -30,7 +30,7 @@ bool ClientSession::isActive() const
 {
     std::lock_guard<std::mutex> lock(mutex_);
     auto now = std::chrono::steady_clock::now();
-    return std::chrono::duration_cast<std::chrono::seconds>(now - last_active_).count() < 10;
+    return std::chrono::duration_cast<std::chrono::seconds>(now - last_active_).count() < 2;
 }
 
 void ClientSession::SetUserName(const std::string &name)
@@ -47,8 +47,11 @@ void ClientSession::updateHeartbeat()
 {
     last_active_ = std::chrono::steady_clock::now();
 }
-
-bool ClientSession::isTimedOut(std::chrono::steady_clock::time_point now, std::chrono::seconds timeout) const
+void ClientSession::updateLastSpeak(){
+    last_speak =std::chrono::steady_clock::now();
+    IsSpeaking=true;
+}
+void ClientSession::isTimedOut()
 {
-    return (now - last_active_) > timeout;
+    IsSpeaking=(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - last_speak).count() < 2);
 }

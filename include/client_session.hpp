@@ -25,14 +25,19 @@ public:
     void SetUserName(const std::string& name);
     void SetRecievePoint(const unsigned short target_port);
     void updateHeartbeat();
-    bool isTimedOut(std::chrono::steady_clock::time_point now, std::chrono::seconds timeout) const;
+    void updateLastSpeak();
+
+    void isTimedOut();
 
     std::string User_Name;
     udp::endpoint recievePoint;
-
+    bool IsSpeaking =false;
+    bool IsMute =false;
 private:
     udp::endpoint endpoint_;
     std::string id_;
     std::chrono::steady_clock::time_point last_active_;
+    std::chrono::steady_clock::time_point last_speak;
     mutable std::mutex mutex_;
+
 };

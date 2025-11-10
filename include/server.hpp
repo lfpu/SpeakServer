@@ -9,6 +9,7 @@
 #include "audio_stream.hpp"
 #include "client_session.hpp"
 #include "config_loader.hpp"
+#include "utils.hpp"
 
 using boost::asio::ip::udp;
 
