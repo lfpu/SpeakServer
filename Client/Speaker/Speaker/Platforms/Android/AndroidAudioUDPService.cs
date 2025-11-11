@@ -242,13 +242,15 @@ namespace Speaker.AndroidPlatform.Service
         public bool isRecording { get; set; } = false;
         public string SpeakTo { get; set; } = "all";
 
-        public async Task<bool> ConnectAsync()
+        public async Task<ServerMessage> ConnectAsync()
         {
+            ServerMessage serverMsg = new ServerMessage();
             try
             {
                 int localPort = ((IPEndPoint)udpReceiver.Client.LocalEndPoint!).Port;
                 byte[] handshake = System.Text.Encoding.UTF8.GetBytes($"handshake:{localPort}");
                 await udpSender.SendAsync(handshake, ConfigConstants.ServerIP, ConfigConstants.ServerPort);
+
                 // 创建一个接收任务
                 var receiveTask = udpSender.ReceiveAsync();
 
@@ -257,26 +259,39 @@ namespace Speaker.AndroidPlatform.Service
 
                 // 等待任意一个任务完成
                 var completedTask = await Task.WhenAny(receiveTask, timeoutTask);
+
                 if (completedTask == receiveTask)
                 {
                     // 成功接收到消息
                     var result = await receiveTask; // 获取结果
-                    string message = System.Text.Encoding.UTF8.GetString(result.Buffer);
-                    IsConnected = message == "handshake_ack";
-                    Console.WriteLine($"连接状态: {IsConnected}, 接收端口: {localPort}");
+                    string message =System.Text.Encoding.UTF8.GetString(result.Buffer);
+                    serverMsg.Connected = IsConnected = message == "handshake_ack";
+                    if (!IsConnected)
+                    {
+                        serverMsg = JsonConvert.DeserializeObject<ServerMessage>(message);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"连接状态: {IsConnected}, 接收端口: {localPort}");
+                        serverMsg.Connected = true;
+                    }
+
                 }
                 else
                 {
                     // 超时
-                    throw new TimeoutException("连接超时：未收到服务器响应");
+                    serverMsg.Connected = false;
+                    serverMsg.Reason = "连接超时：超过3秒未收到服务器响应";
+                    Console.WriteLine("连接超时：超过3秒未收到服务器响应");
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"连接失败: {ex.Message}");
             }
-            return IsConnected;
+            return serverMsg;
         }
+
 
         public void Start()
         {

@@ -29,8 +29,9 @@ namespace Speaker.Windows
         public bool IsConnected { get; set; }
         public string SpeakTo { get; set; } = "all";
 
-        public async Task<bool> ConnectAsync()
+        public async Task<ServerMessage> ConnectAsync()
         {
+            ServerMessage serverMsg=new ServerMessage();
             try
             {
                 int localPort = ((IPEndPoint)udpReceiver.Client.LocalEndPoint!).Port;
@@ -51,22 +52,31 @@ namespace Speaker.Windows
                     // 成功接收到消息
                     var result = await receiveTask; // 获取结果
                     string message = Encoding.UTF8.GetString(result.Buffer);
-                    IsConnected = message == "handshake_ack";
-                    Console.WriteLine($"连接状态: {IsConnected}, 接收端口: {localPort}");
-                    return IsConnected;
+                    serverMsg.Connected = IsConnected = message == "handshake_ack";
+                    if (!IsConnected)
+                    {
+                        serverMsg = JsonConvert.DeserializeObject<ServerMessage>(message);
+                    }
+                    else
+                    {
+                        Console.WriteLine($"连接状态: {IsConnected}, 接收端口: {localPort}");
+                        serverMsg.Connected = true;
+                    }
+
                 }
                 else
                 {
                     // 超时
+                    serverMsg.Connected = false;
+                    serverMsg.Reason = "连接超时：超过3秒未收到服务器响应";
                     Console.WriteLine("连接超时：超过3秒未收到服务器响应");
-                    return false;
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"连接失败: {ex.Message}");
-                return false;
             }
+            return serverMsg;
         }
 
 

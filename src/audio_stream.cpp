@@ -64,8 +64,8 @@ void AudioStreamManager::forwardAudio(const std::vector<char> &data, const std::
     {
         for (const auto &[key, endpoint] : clients_)
         {
-            //if (key != senderid)
-            //{
+            if (key != senderid)
+            {
                 boost::system::error_code ec;
                 socket_.send_to(boost::asio::buffer(audio), endpoint, 0, ec);
                 if (ec)
@@ -76,7 +76,7 @@ void AudioStreamManager::forwardAudio(const std::vector<char> &data, const std::
                 // {
                 //     std::clog << "Send voice data to :" << endpoint.address() << ", receive port:" << endpoint.port() << std::endl;
                 // }
-            //}
+            }
         }
         // std::cout << "Forword to " << clients_.size() << "success." << std::endl;
     }

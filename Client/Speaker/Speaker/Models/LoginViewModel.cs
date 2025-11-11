@@ -54,9 +54,9 @@ namespace Speaker.Models
                 IsBusy=false;
                 return;
             }
-            var IsConnect= await _audioUDPService.ConnectAsync();
+            var serverMsg= await _audioUDPService.ConnectAsync();
             IsBusy = false;
-            if (!IsConnect) { await Application.Current.MainPage.DisplayAlertAsync("错误", "连接服务器失败！", "确定"); return; }
+            if (!serverMsg.Connected) { await Application.Current.MainPage.DisplayAlertAsync("错误", serverMsg.Reason, "确定"); return; }
 
             await Application.Current.MainPage.Navigation.PushAsync(new ChatPage(Username, _audioUDPService));
 

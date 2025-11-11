@@ -11,7 +11,7 @@ namespace Speaker.Services
         bool isRecording { get; set; }
         bool IsConnected { get; set; }
         string SpeakTo { get; set; }
-        Task<bool> ConnectAsync();
+        Task<ServerMessage> ConnectAsync();
         void Start();
         void RecordAndSend();
         void StopRecordSend();

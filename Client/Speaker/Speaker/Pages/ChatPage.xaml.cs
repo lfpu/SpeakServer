@@ -113,8 +113,11 @@ public partial class ChatPage : ContentPage
     }
     protected override void OnNavigatingFrom(NavigatingFromEventArgs args)
     {
-        GetUserTask = false;
-        SpeakService.Dispose();
+        if (args.NavigationType == NavigationType.PopToRoot)
+        {
+            GetUserTask = false;
+            SpeakService.Dispose();
+        }
         base.OnNavigatingFrom(args);
     }
     protected override void OnDisappearing()
