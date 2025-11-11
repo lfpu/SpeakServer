@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="128" height="128" fill="#333">
+  <!-- 外框 -->
+  <rect x="128" y="96" width="256" height="320" rx="32" ry="32" stroke="none" />
+  
+  <!-- 天线 -->
+  <rect x="224" y="16" width="32" height="80" rx="16" ry="16" />
+  
+  <!-- 顶部按钮 -->
+  <rect x="288" y="48" width="64" height="48" rx="12" ry="12" />
+  
+  <!-- 屏幕 -->
+  <rect x="176" y="144" width="160" height="64" rx="8" ry="8" fill="#fff" />
+  
+  <!-- 功能条 -->
+  <rect x="176" y="224" width="160" height="24" rx="4" ry="4" />
+  <rect x="176" y="256" width="160" height="24" rx="4" ry="4" />
+  
+  <!-- 按钮 -->
+  <circle cx="192" cy="320" r="16" />
+  <circle cx="240" cy="320" r="16" />
+  <circle cx="288" cy="320" r="16" />
+  <circle cx="192" cy="368" r="16" />
+  <circle cx="240" cy="368" r="16" />
+  <circle cx="288" cy="368" r="16" />
+</svg>
