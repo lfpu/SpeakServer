@@ -48,7 +48,7 @@ void VoiceServer::startReceive()
                 std::vector<char> data(recv_buffer_.begin(), recv_buffer_.begin() + bytes_recvd);
                 std::string client_id = remote_endpoint_.address().to_string() + ":" + std::to_string(remote_endpoint_.port());
 
-                dispatchMessage(client_id,data);
+                dispatchMessage(client_id, data);
                 // 线程池
                 // boost::asio::post(pool_, [this, client_id, data = std::move(data)]() mutable
                 //                   { dispatchMessage(client_id, std::move(data)); });
@@ -73,8 +73,12 @@ MessageType VoiceServer::parseMessageTypes(const std::vector<char> &data)
         return MessageType::Handshake;
     if (msg._Starts_with("heartbeat"))
         return MessageType::Heartbeat;
+    if(msg._Starts_with("new_channel"))
+        return MessageType::NewChannel;
     if (msg == "GetUsers")
         return MessageType::GetUsers;
+    if (msg == "get_channels")
+        return MessageType::GetChannels;
     if (msg == "receive")
         return MessageType::Receive;
     if (data[0] == 0x001)
@@ -96,6 +100,9 @@ void VoiceServer::dispatchMessage(const std::string &client_id, const std::vecto
     case MessageType::Heartbeat:
         handleHeartbeat(client_id, msg);
         break;
+    case MessageType::NewChannel:
+        handleNewChannel(client_id, msg);
+        break;
     case MessageType::GetUsers:
         handleGetUsers(client_id);
         break;
@@ -104,6 +111,9 @@ void VoiceServer::dispatchMessage(const std::string &client_id, const std::vecto
         break;
     case MessageType::SpeakingStart:
         setSpeaking(client_id, true);
+        break;
+    case MessageType::GetChannels:
+        handleGetChannels(client_id);
         break;
     case MessageType::SpeakingStop:
         setSpeaking(client_id, false);
@@ -119,7 +129,22 @@ void VoiceServer::dispatchMessage(const std::string &client_id, const std::vecto
 void VoiceServer::handleHandshake(const std::string &client_id, std::string_view msg)
 {
     // TODO: 注册客户端逻辑
-    int recievePorint = std::stoi(std::string(msg.substr(10))); // 提取接收端口号
+    auto parts = splitByChar(std::string(msg.substr(10)), ':');
+    int recievePorint = std::stoi(std::string(parts[0])); // 提取接收端口号
+    std::string username = parts.size() > 1 ? parts[1] : "Unknown"; // 提取用户名
+    //查询是否已存在该username的session
+
+    auto username_it = std::find_if(client_sessions_.begin(), client_sessions_.end(),
+                                    [&username](const auto &pair)
+                                    { return pair.second->User_Name == username; });
+    if (username_it != client_sessions_.end())
+    {
+        std::cerr << "Username already taken: " << username << std::endl;
+        // 通知客户端用户名已被占用
+        ControlMessageSender control_sender(socket_);
+        control_sender.sendReject(remote_endpoint_, "Username already taken. Choose another one.");
+        return; // Skip adding this client
+    }
     auto it = client_sessions_.find(client_id);
     if (it == client_sessions_.end())
     {
@@ -152,13 +177,16 @@ void VoiceServer::handleHandshake(const std::string &client_id, std::string_view
 
 void VoiceServer::handleHeartbeat(const std::string &client_id, std::string_view msg)
 {
-    std::string username = std::string(msg.substr(10)); // 提取用户名
+    auto parts = splitByChar(std::string(msg.substr(10)), ':');
+    std::string username = parts[0];                               // 提取用户名
+    std::string channel = parts.size() > 1 ? parts[1] : "Lobby"; // 提取频道名，默认为"Lobby"
     auto it = client_sessions_.find(client_id);
     if (it != client_sessions_.end())
     {
         it->second->updateHeartbeat();
         it->second->updateLastActive();
         it->second->SetUserName(username);
+        it->second->SetChannel(channel);
         audio_stream_manager_.UpdateClients(it->second->User_Name);
         // std::cout << "Heartbeat received from User:" << username << "," << client_id << std::endl;
         //  socket_.send_to(boost::asio::buffer("copy"),remote_endpoint_);
@@ -171,13 +199,34 @@ void VoiceServer::handleHeartbeat(const std::string &client_id, std::string_view
         std::cout << "New client connected via heartbeat: User:" << username << "," << client_id << std::endl;
     }
 }
-
+void VoiceServer::handleNewChannel(const std::string &client_id, std::string_view msg)
+{
+    auto parts = splitByChar(std::string(msg), ':');
+    if (parts.empty())
+        return;
+    std::string new_channel = parts[1]; // 提取新频道名
+    auto it = client_sessions_.find(client_id);
+    if (it != client_sessions_.end())
+    {
+        it->second->SetChannel(new_channel);
+        std::cout << "Client " << client_id << " switched to channel: " << new_channel << std::endl;
+    }
+}
 void VoiceServer::handleGetUsers(const std::string &client_id)
 {
-    // TODO: 返回用户列表
-    socket_.send_to(getDistinctUserNamesJson(client_sessions_), remote_endpoint_);
+    // TODO: 返回同频道用户列表
+    auto it = client_sessions_.find(client_id);
+    if (it == client_sessions_.end())
+        return;
+    std::string data = getDistinctUserNames(client_sessions_, it->second->GetChannel());
+    //std::cout << "Users :" << data << std::endl;
+    socket_.send_to(boost::asio::buffer(data) , remote_endpoint_);
 }
-
+void VoiceServer::handleGetChannels(const std::string &client_id)
+{
+    std::string data = getDistinctChannels(client_sessions_);
+    socket_.send_to(boost::asio::buffer(data), remote_endpoint_);
+}
 void VoiceServer::handleReceive(const std::string &client_id)
 {
     // TODO: 发送音频数据
@@ -202,7 +251,7 @@ void VoiceServer::handleAudio(const std::string &client_id, const std::vector<ch
         return;
     if (it->second->IsMute)
         return;
-    audio_stream_manager_.receiveAudio(data, it->second->User_Name, it->second->recievePoint);
+    audio_stream_manager_.receiveAudio(data, it->second->User_Name, it->second->recievePoint, it->second->GetChannel());
 }
 
 void VoiceServer::cleanupInactiveSessions()

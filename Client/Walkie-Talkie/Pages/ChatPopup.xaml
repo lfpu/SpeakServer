@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               x:Class="Walkie_Talkie.Pages.ChatPopup">
+
+    <Frame Padding="20"
+           BackgroundColor="#526B52"
+           CornerRadius="12"
+           HasShadow="True"
+           WidthRequest="350"
+           HeightRequest="250"
+           VerticalOptions="Center"
+           HorizontalOptions="Center">
+        <VerticalStackLayout Spacing="15">
+            <!-- 标题 -->
+            <Label Text="操作选项"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   TextColor="#fff"/>
+
+            <!-- 按钮组 -->
+            <Button Text="Mute"
+                    Clicked="OnMuteClicked"
+                    BackgroundColor="#D23F3F"
+                    TextColor="White"
+                    CornerRadius="8"
+                    HeightRequest="45"
+                    FontAttributes="Bold"/>
+
+            <Button Text="私发"
+                    Clicked="OnChatPrivateClicked"
+                    BackgroundColor="#98C54C"
+                    TextColor="White"
+                    CornerRadius="8"
+                    HeightRequest="45"
+                    FontAttributes="Bold"/>
+
+            <Button Text="关闭"
+                    Clicked="OnCloseClicked"
+                    BackgroundColor="#0078D7"
+                    TextColor="White"
+                    CornerRadius="8"
+                    HeightRequest="45"
+                    FontAttributes="Bold"/>
+        </VerticalStackLayout>
+    </Frame>
+</toolkit:Popup>

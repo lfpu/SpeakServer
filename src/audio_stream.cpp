@@ -32,9 +32,8 @@ std::string AudioStreamManager::extractSpeakTo(const std::vector<char> &data)
 
     return custom;
 }
-void AudioStreamManager::receiveAudio(const std::vector<char> &data, std::string key, const udp::endpoint &receiver)
+void AudioStreamManager::receiveAudio(const std::vector<char> &data, std::string key, const udp::endpoint &receiver, const std::string channelId)
 {
-    // std::string key = sender.address().to_string() + ":" + std::to_string(sender.port());
     // 输出音频文件
     //  try
     //  {
@@ -48,23 +47,24 @@ void AudioStreamManager::receiveAudio(const std::vector<char> &data, std::string
     {
         std::lock_guard<std::mutex> lock(mutex_);
         clients_[key] = receiver;
+        userChannelMap[key] = channelId;
         last_active_[key] = std::chrono::steady_clock::now();
     }
 
-    forwardAudio(data, key);
+    forwardAudio(data, key,channelId);
 }
 
-void AudioStreamManager::forwardAudio(const std::vector<char> &data, const std::string senderid)
+void AudioStreamManager::forwardAudio(const std::vector<char> &data, const std::string senderid, const std::string channel)
 {
     std::lock_guard<std::mutex> lock(mutex_);
     std::string user = extractSpeakTo(data);
-    std::cerr << "speak to " << user << std::endl;
+    //std::cerr << "speak to " << user << std::endl;
     std::vector<char> audio(data.begin() + 8, data.end());
     if (user == "all")
     {
         for (const auto &[key, endpoint] : clients_)
         {
-            if (key != senderid)
+            if (key != senderid && userChannelMap[key]==channel)
             {
                 boost::system::error_code ec;
                 socket_.send_to(boost::asio::buffer(audio), endpoint, 0, ec);
@@ -83,7 +83,7 @@ void AudioStreamManager::forwardAudio(const std::vector<char> &data, const std::
     else
     {
         auto it = clients_.find(user);
-        if (it != clients_.end())
+        if (it != clients_.end() && userChannelMap[user]==channel)
         {
             boost::system::error_code ec;
             socket_.send_to(boost::asio::buffer(audio), it->second, 0, ec);
@@ -91,7 +91,7 @@ void AudioStreamManager::forwardAudio(const std::vector<char> &data, const std::
             {
                 std::cerr << "Failed to send audio to " << user << ": " << ec.message() << std::endl;
             }
-            std::cout << "Forword to  User: " << user << " success." << std::endl;
+            //std::cout << "Forword to  User: " << user << " success." << std::endl;
         }
     }
 }

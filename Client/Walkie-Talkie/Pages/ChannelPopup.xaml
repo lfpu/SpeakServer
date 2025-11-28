@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<toolkit:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+               x:Class="Walkie_Talkie.Pages.ChannelPopup">
+
+    <Frame Padding="20"
+           BackgroundColor="#526B52"
+           CornerRadius="20"
+           HasShadow="True"
+           WidthRequest="300"
+           VerticalOptions="Center"
+           HorizontalOptions="Center">
+        <VerticalStackLayout Spacing="15">
+            <!-- 标题 -->
+            <Label Text="添加频道"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   TextColor="#fff"/>
+
+            <!-- 输入框 -->
+            <Editor x:Name="ChannelName"
+                    Placeholder="请输入频道名称"
+                    AutoSize="TextChanges"
+                    BackgroundColor="#F5F5F5"
+                    HeightRequest="40"
+                    Margin="0,10,0,0"
+                    TextColor="#333"/>
+
+            <!-- 按钮 -->
+            <Button Text="添加"
+                    Clicked="OnAddClicked"
+                    BackgroundColor="#0078D7"
+                    TextColor="White"
+                    CornerRadius="8"
+                    HeightRequest="45"
+                    FontAttributes="Bold"/>
+        </VerticalStackLayout>
+    </Frame>
+</toolkit:Popup>

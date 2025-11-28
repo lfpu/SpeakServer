@@ -9,7 +9,7 @@
 class AudioFile
 {
 public:
-    AudioFile(const std::string &name,int rate,int bit,int cha);
+    AudioFile(const std::string &name,int rate,int bit,int channel);
     void write(const std::vector<char> &data);
 private:
     std::string fileName;

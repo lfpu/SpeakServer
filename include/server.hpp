@@ -18,10 +18,12 @@ enum class MessageType
     Handshake,
     Heartbeat,
     GetUsers,
+    GetChannels,
     Receive,
     SpeakingStart,
     SpeakingStop,
     Audio,
+    NewChannel,
     Unknown
 };
 
@@ -39,7 +41,9 @@ private:
 
     void handleHandshake(const std::string &client_id, std::string_view msg);
     void handleHeartbeat(const std::string &client_id, std::string_view msg);
+    void handleNewChannel(const std::string &client_id, std::string_view msg);
     void handleGetUsers(const std::string &client_id);
+    void handleGetChannels(const std::string &client_id);
     void handleReceive(const std::string &client_id);
     void setSpeaking(const std::string &client_id, bool speaking);
     void handleAudio(const std::string &client_id, const std::vector<char> &data);

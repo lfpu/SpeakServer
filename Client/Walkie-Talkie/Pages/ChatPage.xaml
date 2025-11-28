@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Walkie_Talkie.Pages.ChatPage"
+             Title="Let's Chat">
+
+    <!-- 顶部导航栏按钮 -->
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="添加频道"
+                     IconImageSource="add_100.png"
+                     Order="Primary"
+                     Priority="0"
+                     Clicked="OnChannelClicked"
+                     />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,*,Auto"
+          ColumnDefinitions="*,Auto"
+
+          Padding="10">
+        <!-- 顶部频道选择区域 -->
+        <Border Stroke="#526B52"
+                StrokeThickness="3"
+                StrokeShape="RoundRectangle 5"
+            Grid.Row="0" Grid.ColumnSpan="2"
+               Padding="5"
+               BackgroundColor="White"
+               Margin="0,0,0,10">
+            <HorizontalStackLayout Spacing="15" VerticalOptions="Center">
+                <Label Text="频道:"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       VerticalOptions="Center"
+                       TextColor="#333"/>
+
+                <Picker x:Name="ChannelPicker"
+                        WidthRequest="150"
+                        ItemsSource="{Binding Channels}"
+                        SelectedItem="{Binding SelectedChannel}"
+                        SelectedIndexChanged="OnPickerSelectedIndexChanged"
+                        HorizontalOptions="Start"
+                        VerticalOptions="Center"/>
+                <Label Text="当前频道:"
+                       FontSize="18"
+                       VerticalOptions="Center"
+                       TextColor="#333"/>
+                <Label x:Name="CurrentChannel"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="#0078D7"
+                       VerticalOptions="Center"/>
+
+                <!--<Button Text="添加频道"
+                        Clicked="OnChannelClicked"
+                        BackgroundColor="#0078D7"
+                        TextColor="White"
+                        CornerRadius="8"
+                        HeightRequest="40"
+                        HorizontalOptions="End"/>-->
+            </HorizontalStackLayout>
+        </Border>
+
+        <!-- 中间显示已加入用户信息 -->
+        <Border Stroke="#526B52" 
+                Margin="0,10,0,0"
+                StrokeThickness="3" Padding="0" 
+                StrokeShape="RoundRectangle 5"
+                Grid.Row="1"
+                MaximumHeightRequest="500">
+
+
+            <CollectionView ItemsSource="{Binding JoinedUsers}" x:Name="collectionView"
+                Margin="0,20,0,20" MaximumHeightRequest="500" VerticalScrollBarVisibility="Always" >
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical" VerticalItemSpacing="10"
+                         Span="2" />
+                    <!-- 每行显示2个卡片 -->
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border 
+                            WidthRequest="150" HeightRequest="150"
+                            Padding="10" Margin="10"
+                            Stroke="#4FC14B"
+                            StrokeShape="RoundRectangle 75"
+                            BackgroundColor="{Binding BackGroundColor}"
+                            >
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnBorderTapped"/>
+                                <PointerGestureRecognizer PointerEntered="OnPointerEntered" PointerExited="OnPointerExited"/>
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" >
+                                <!-- 用户头像 -->
+                                <Image Source="{Binding AvatarUrl}"
+                           WidthRequest="80"
+                           HeightRequest="80"
+                           Aspect="AspectFill"
+                                   VerticalOptions="Center"
+                           />
+
+                                <!-- 用户名 -->
+                                <Label Text="{Binding UserName}"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"
+                                   VerticalOptions="Center"
+                           />
+
+                                <!-- 状态 -->
+                                <Label Text="{Binding StateName}"
+                           FontSize="14"
+                           TextColor="Gray"
+                           HorizontalOptions="Center"
+                                   VerticalOptions="Center"
+                           />
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </Border>
+        <!-- 底部按钮：按住说话 -->
+        <Button Grid.Row="2" Grid.ColumnSpan="2"
+                BorderWidth="10"
+                x:Name="SpeakBtn"
+                Text="按住说话"
+                FontSize="Large"
+                BackgroundColor="#526B52"
+                CornerRadius="100"
+                HeightRequest="200"
+                WidthRequest="200"
+                Pressed="OnSpeakPressed"
+                Released="OnSpeakReleased"
+                VerticalOptions="End" />
+    </Grid>
+</ContentPage>

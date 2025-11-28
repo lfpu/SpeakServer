@@ -18,11 +18,11 @@ public:
     /// @brief 接收音频数据并更新客户端活跃时间。
     /// @param data 
     /// @param sender 
-    void AudioStreamManager::receiveAudio(const std::vector<char> &data, std::string key, const udp::endpoint &receiver);
+    void AudioStreamManager::receiveAudio(const std::vector<char> &data, std::string key, const udp::endpoint &receiver, const std::string channelId);
     /// @brief 转发音频数据到其他客户端。
     /// @param data
     /// @param sender
-    void AudioStreamManager::forwardAudio(const std::vector<char> &data, const std::string senderid);
+    void AudioStreamManager::forwardAudio(const std::vector<char> &data, const std::string senderid, const std::string channel);
     /// @brief 注册新客户端。
     /// @param client
     void registerClient(const udp::endpoint& client);
@@ -33,8 +33,9 @@ private:
     boost::asio::ip::udp::socket& socket_;
     std::unordered_map<std::string, udp::endpoint> clients_;
     std::unordered_map<std::string, std::chrono::steady_clock::time_point> last_active_;
+    std::unordered_map<std::string, std::string> userChannelMap;
     std::mutex mutex_;
 
-    //AudioFile file;
+    AudioFile file{"output_audio.raw", 16000, 16, 1};
     std::string extractSpeakTo(const std::vector<char>& data);
 };

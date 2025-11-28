@@ -7,5 +7,7 @@
 #include "client_session.hpp"
 #include <boost/asio.hpp>
 
-boost::asio::const_buffer getDistinctUserNamesJson(
-    const std::unordered_map<std::string, std::shared_ptr<ClientSession>> &client_sessions);
+std::string getDistinctUserNames(
+    const std::unordered_map<std::string, std::shared_ptr<ClientSession>> &client_sessions,const std::string& channel);
+std::vector<std::string> splitByChar(const std::string &str, char delimiter);
+std::string getDistinctChannels(const std::unordered_map<std::string, std::shared_ptr<ClientSession>> &client_sessions);

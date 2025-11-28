@@ -55,3 +55,12 @@ void ClientSession::isTimedOut()
 {
     IsSpeaking=(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - last_speak).count() < 2);
 }
+
+void ClientSession::SetChannel(const std::string &channel) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    ChannelId = channel;
+}
+std::string ClientSession::GetChannel() const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    return ChannelId;
+}

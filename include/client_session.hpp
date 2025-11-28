@@ -27,6 +27,9 @@ public:
     void updateHeartbeat();
     void updateLastSpeak();
 
+    void SetChannel(const std::string &channel); /// 设置当前频道
+    std::string GetChannel() const;              /// 获取当前频道
+
     void isTimedOut();
 
     std::string User_Name;
@@ -35,6 +38,7 @@ public:
     bool IsMute =false;
 private:
     udp::endpoint endpoint_;
+    std::string ChannelId;  // 当前频道
     std::string id_;
     std::chrono::steady_clock::time_point last_active_;
     std::chrono::steady_clock::time_point last_speak;
